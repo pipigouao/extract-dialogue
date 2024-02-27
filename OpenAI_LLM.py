@@ -1,4 +1,5 @@
 import openai
+from openai import OpenAI
 import os
 from langchain.llms.base import LLM
 from typing import Dict, List, Optional, Tuple, Union
@@ -8,19 +9,24 @@ _ = load_dotenv(find_dotenv())
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
+client = OpenAI(
+    # This is the default and can be omitted
+    api_key=os.environ.get("OPENAI_API_KEY"),
+)
+
 def get_completion(prompt, model="gpt-3.5-turbo"):
     '''
     prompt: 对应的提示词
     model: 调用的模型，默认为 gpt-3.5-turbo(ChatGPT)，有内测资格的用户可以选择 gpt-4
     '''
     messages = [{"role": "user", "content": prompt}]
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=model,
         messages=messages,
         temperature=0, # 模型输出的温度系数，控制输出的随机程度
     )
     # 调用 OpenAI 的 ChatCompletion 接口
-    return response.choices[0].message["content"]
+    return response.choices[0].message.content
 
 class OpenAI_LLM(LLM):
     model_type: str = "openai"
